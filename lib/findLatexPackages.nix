@@ -31,7 +31,7 @@ in
 
       lineToPackageNames = (
         line: let
-          exact = builtins.match ''\\usepackage.*\{\s*(.*?)\s*\}.*'' line;
+          exact = builtins.match ''\\(usepackage|RequirePackage).*\{(.*)}'' line;
           multicomment = processLine line 1;
         in
           (
