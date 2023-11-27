@@ -1,3 +1,6 @@
+# Finding LaTex Packages name as list
+# INPUT:str         // the content of a file though readFiles
+# OUTPUT:List[str]  // a list of packages names
 {
   pkgs,
   lib,
