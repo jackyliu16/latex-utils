@@ -15,7 +15,7 @@ in
       inherit (builtins) trace match head tail split filter readFile isList isNull elemAt pathExists;
       inherit (pkgs.lib) concatMap concatLists subtractLists splitString genAttrs unique remove
         hasSuffix isDerivation;
-      contentsLines = builtins.splitString "\n" fileContents;
+      contentsLines = splitString "\n" fileContents;
       # Check if line contains package information
       preprocessLines = builtins.filter (line: !(isPackageLines line)) contentsLines; # List[str]: the line contains package info
       processedPackages = unique (builtins.concatMap gainPackageNameFromLine preprocessLines); # List[str]: the line contains package name
