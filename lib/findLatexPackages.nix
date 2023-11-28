@@ -18,7 +18,7 @@ in
       contentsLines = builtins.splitString "\n" fileContents;
       # Check if line contains package information
       preprocessLines = builtins.filter (line: !(isPackageLines line)) contentsLines; # List[str]: the line contains package info
-      processedPackages = lists.unique (builtins.concatMap gainPackageNameFromLine preprocessLines); # List[str]: the line contains package name
+      processedPackages = unique (builtins.concatMap gainPackageNameFromLine preprocessLines); # List[str]: the line contains package name
 
       texPackages = filterAttrs (y: x: x != null) processedPackages (genAttrs  (name: attrByPath [name] null pkgs.texlive));
 
