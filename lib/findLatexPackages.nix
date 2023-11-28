@@ -10,10 +10,10 @@ in
   {fileContents}:
     with pkgs.lib.attrsets;
     with pkgs.lib.strings; 
-    with (builtins) trace match head tail split filter readFile isList isNull elemAt pathExists;
-    with (lib) concatMap concatLists subtractLists splitString genAttrs unique remove
-      hasSuffix isDerivation;
     let 
+      inherit (builtins) trace match head tail split filter readFile isList isNull elemAt pathExists;
+      inherit (lib) concatMap concatLists subtractLists splitString genAttrs unique remove
+        hasSuffix isDerivation;
       contentsLines = builtins.splitString "\n" fileContents;
       # Check if line contains package information
       preprocessLines = builtins.filter (line: !(isPackageLines line)) contentsLines; # List[str]: the line contains package info
