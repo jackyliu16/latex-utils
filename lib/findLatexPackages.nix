@@ -5,15 +5,14 @@
   pkgs,
   lib,
   ...
-}: 
-let
-  inherit (builtins) trace match head tail split filter readFile isList isNull elemAt pathExists;
-  inherit (lib) concatMap concatLists subtractLists splitString genAttrs unique remove
-    hasSuffix isDerivation;
+}: let
 in
   {fileContents}:
     with pkgs.lib.attrsets;
     with pkgs.lib.strings; 
+    with (builtins) trace match head tail split filter readFile isList isNull elemAt pathExists;
+    with (lib) concatMap concatLists subtractLists splitString genAttrs unique remove
+      hasSuffix isDerivation;
     let 
       contentsLines = builtins.splitString "\n" fileContents;
       # Check if line contains package information
