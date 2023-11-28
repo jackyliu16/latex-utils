@@ -11,13 +11,10 @@ in
     with pkgs.lib.attrsets;
     with pkgs.lib.strings; 
     let 
-      inherit (builtins) trace match head tail split filter readFile isList isNull elemAt pathExists;
-      inherit (lib) concatMap concatLists subtractLists splitString genAttrs unique remove
-        hasSuffix isDerivation;
       contentsLines = builtins.splitString "\n" fileContents;
       # Check if line contains package information
       preprocessLines = builtins.filter (line: !(isPackageLines line)) contentsLines; # List[str]: the line contains package info
-      processedPackages = lib.unique (builtins.concatMap gainPackageNameFromLine preprocessLines); # List[str]: the line contains package name
+      processedPackages = lib.lists.unique (builtins.concatMap gainPackageNameFromLine preprocessLines); # List[str]: the line contains package name
 
       texPackages = filterAttrs (y: x: x != null) processedPackages (genAttrs  (name: attrByPath [name] null pkgs.texlive));
 
