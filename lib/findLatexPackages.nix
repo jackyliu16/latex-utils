@@ -12,6 +12,9 @@ in
     with pkgs.lib.strings; 
     with pkgs.lib.lists;
     let 
+      inherit (builtins) trace match head tail split filter readFile isList isNull elemAt pathExists;
+      inherit (pkgs.lib) concatMap concatLists subtractLists splitString genAttrs unique remove
+        hasSuffix isDerivation;
       contentsLines = builtins.splitString "\n" fileContents;
       # Check if line contains package information
       preprocessLines = builtins.filter (line: !(isPackageLines line)) contentsLines; # List[str]: the line contains package info
