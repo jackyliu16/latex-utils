@@ -17,22 +17,26 @@ in
         hasSuffix isDerivation;
       contentsLines = splitString "\n" fileContents;
       # Check if line contains package information
-      preprocessLines = builtins.filter (line: !(isPackageLines line)) contentsLines; # List[str]: the line contains package info
-      processedPackages = unique (builtins.concatMap gainPackageNameFromLine preprocessLines); # List[str]: the line contains package name
-
-      texPackages = filterAttrs (y: x: x != null) processedPackages (genAttrs processedPackages (name: attrByPath [name] null pkgs.texlive));
+      preprocessLines = builtins.filter (line: (isPackageLines line)) contentsLines; # List[str]: the line contains package info
+      # Gain PackageNames
+      processedPackages = builtins.filter (line: gainPackageNameFromLine line != null) preprocessLines;
+      
+      # processedPackages = unique (builtins.concatMap gainPackageNameFromLine preprocessLines); # List[str]: the line contains package name
+      # texPackages = filterAttrs (y: x: x != null) processedPackages (genAttrs processedPackages (name: attrByPath [name] null pkgs.texlive));
 
       isPackageLines = line: let # str -> Bool
         res = builtins.match ''\\(usepackage|Requirepackage).*'' line;
       in res != null;
+
       gainPackageNameFromLine = line: let # str -> List[str]
         matchers = builtins.tail (builtins.match ''\\(usepackage|RequirePackage).*\{(.*)}}'' line); # [ ~~"usepackage"~~ "a" "b" ]
+        # matchers = builtins.match ''\\(usepackage|RequirePackage).*\{(.*)}}'' line;
         # Check if each name provide by matcher is correct
         # TODO: add more trace output when incorrect.
-        res = builtins.filter (ps: ps != false) builtins.map ifPackageNameFormatCorrect matchers;   
+        res = builtins.filter ifPackageNameFormatCorrect matchers;
       in res;
-      ifPackageNameFormatCorrect = one: let # str -> Bool
-        res = builtins.match ''^[a-z](?|.*--)[a-z-]*[a-z]$'' one;
-      in res != null;
+        ifPackageNameFormatCorrect = one: let # str -> Bool
+          res = builtins.match ''^[a-z](?|.*--)[a-z-]*[a-z]$'' one;
+        in res != null;
     in
-     texPackages 
+      processedPackages
