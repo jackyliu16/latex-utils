@@ -20,7 +20,7 @@ in
       preprocessLines = builtins.filter (line: !(isPackageLines line)) contentsLines; # List[str]: the line contains package info
       processedPackages = unique (builtins.concatMap gainPackageNameFromLine preprocessLines); # List[str]: the line contains package name
 
-      texPackages = filterAttrs (y: x: x != null) processedPackages (genAttrs  (name: attrByPath [name] null pkgs.texlive));
+      texPackages = filterAttrs (y: x: x != null) processedPackages (genAttrs processedPackages (name: attrByPath [name] null pkgs.texlive));
 
       isPackageLines = line: let # str -> Bool
         res = builtins.match ''\\(usepackage|Requirepackage).*'' line;
