@@ -10,6 +10,7 @@ in
   {fileContents}:
     with pkgs.lib.attrsets;
     with pkgs.lib.strings; 
+    with pkgs.lib.lists;
     let 
       contentsLines = builtins.splitString "\n" fileContents;
       # Check if line contains package information
