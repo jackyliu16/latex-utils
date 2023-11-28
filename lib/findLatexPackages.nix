@@ -27,4 +27,4 @@ in
         res = builtins.match ''^[a-z](?|.*--)[a-z-]*[a-z]$'' one;
       in res != null;
     in
-     gainPackageName 
+     texPackages 
