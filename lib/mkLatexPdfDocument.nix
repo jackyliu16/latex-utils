@@ -24,15 +24,16 @@ with pkgs.lib.attrsets; let
   searchPaths = lib.findLatexFiles {basePath = "${src}/${workingDirectory}";}; 
   discoveredPackages = let
     gainPackFromPath = (path: (lib.findLatexPackages {fileContents = builtins.readFile path;}));
-    eachFile = map gainPackFromPath searchPaths;
-    # packNames = builtins.foldl' (a: b: a ++ b) [] eachFile; # [{a="A";} {b="B"};] => {a="A"; b="B";}
-    packNames = builtins.concatLists (builtins.concatLists eachFile);
-    detectTexPacks = filterAttrs (y: x: x != null) (genAttrs packNames (name: attrByPath [name] null pkgs.texlive));
-    # detectTexLists = builtins.attrValues detectTexPacks;
+    eachFile = map gainPackFromPath searchPaths; # List[File:List[PackName:str]]
+    packNames = builtins.concatLists (builtins.concatLists eachFile); # List[PackName:str]
+    detectTexPacks = filterAttrs (y: x: x != null) (genAttrs packNames (name: attrByPath [name] null pkgs.texlive)); # Set[PackName:Derivation]
+    undetectTexPacks = filterAttrs (y: x: x == null) (genAttrs packNames (name: attrByPath [name] null pkgs.texlive)); # Set[PackName:Derivation]
   in
-    if silent
+    if silent || (undetectTexPacks== {})
     then detectTexPacks
-    else lib.trace "identified packages (add more with argument 'texPackages'): ${toString (attrNames packNames)}." detectTexPacks;
+    else pkgs.lib.warn 
+      "identified packages (add more with argument 'texPackages'): ${toString (attrNames undetectTexPacks)}." 
+      detectTexPacks;
 
   allPackages =
     {
@@ -52,7 +53,7 @@ with pkgs.lib.attrsets; let
     // texPackages;
   texEnvironment = pkgs.texlive.combine allPackages;
 in
-  pkgs.stdenvNoCC.mkDerivation rec {
+  chosenStdenv.mkDerivation rec {
     inherit src;
     name = fixedName;
 
