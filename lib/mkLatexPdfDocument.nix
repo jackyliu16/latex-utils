@@ -23,12 +23,15 @@ with pkgs.lib.attrsets; let
 
   searchPaths = lib.findLatexFiles {basePath = "${src}/${workingDirectory}";}; 
   discoveredPackages = let
-    eachFile = map (path: (lib.findLatexPackages {fileContents = builtins.readFile path;})) searchPaths;
-    together = builtins.foldl' (a: b: a // b) {} eachFile;
+    gainPackFromPath = (path: (lib.findLatexPackages {fileContents = builtins.readFile path;}));
+    eachFile = map gainPackFromPath searchPaths;
+    # packNames = builtins.foldl' (a: b: a ++ b) [] eachFile; # [{a="A";} {b="B"};] => {a="A"; b="B";}
+    packNames = builtins.concatLists (builtins.concatLists eachFile);
+    detectTexPacks = filterAttrs (y: x: x != null) (genAttrs packNames (name: attrByPath [name] null pkgs.texlive));
   in
     if silent
-    then together
-    else lib.trace "identified packages (add more with argument 'texPackages'): ${toString (attrNames together)}." together;
+    then packNames
+    else lib.trace "identified packages (add more with argument 'texPackages'): ${toString (attrNames packNames)}." detectTexPacks;
 
   allPackages =
     {
@@ -44,16 +47,18 @@ with pkgs.lib.attrsets; let
         csquotes
         ;
     }
-    // discoveredPackages
+    # // discoveredPackages
     // texPackages;
   texEnvironment = pkgs.texlive.combine allPackages;
 in
-  chosenStdenv.mkDerivation rec {
+  pkgs.stdenvNoCC.mkDerivation rec {
     inherit src;
     name = fixedName;
 
+    whatthefuck = { a = discoveredPackages; };
+
     nativeBuildInputs =
-      (args.nativeBuildInputs or [])
+      args.nativeBuildInputs or []
       ++ (with pkgs; [
         coreutils
         texEnvironment
