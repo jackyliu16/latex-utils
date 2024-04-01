@@ -28,9 +28,10 @@ with pkgs.lib.attrsets; let
     # packNames = builtins.foldl' (a: b: a ++ b) [] eachFile; # [{a="A";} {b="B"};] => {a="A"; b="B";}
     packNames = builtins.concatLists (builtins.concatLists eachFile);
     detectTexPacks = filterAttrs (y: x: x != null) (genAttrs packNames (name: attrByPath [name] null pkgs.texlive));
+    # detectTexLists = builtins.attrValues detectTexPacks;
   in
     if silent
-    then packNames
+    then detectTexPacks
     else lib.trace "identified packages (add more with argument 'texPackages'): ${toString (attrNames packNames)}." detectTexPacks;
 
   allPackages =
@@ -47,15 +48,13 @@ with pkgs.lib.attrsets; let
         csquotes
         ;
     }
-    # // discoveredPackages
+    // discoveredPackages
     // texPackages;
   texEnvironment = pkgs.texlive.combine allPackages;
 in
   pkgs.stdenvNoCC.mkDerivation rec {
     inherit src;
     name = fixedName;
-
-    whatthefuck = { a = discoveredPackages; };
 
     nativeBuildInputs =
       args.nativeBuildInputs or []
